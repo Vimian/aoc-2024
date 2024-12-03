@@ -39,7 +39,7 @@ func part2(input string) {
 	dontWants := regexp.MustCompile(`(?s)don't\(\).{0,}?do\(\)`).FindAllString(input, -1)
 
 	for _, dontWant := range dontWants {
-		input = strings.ReplaceAll(input, dontWant, "")
+		input = strings.ReplaceAll(input, dontWant, " ")
 	}
 
 	part1(input)
