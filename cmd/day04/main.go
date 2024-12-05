@@ -27,23 +27,25 @@ func part1(input [][]string, word []string) {
 
 	for y, row := range input {
 		for x, char := range row {
-			if char == word[0] {
-				for _, direction := range directions {
-					for i := 1; i < len(word); i++ {
-						newY := y + (direction[0] * i)
-						newX := x + (direction[1] * i)
+			if (char != word[0]) {
+				continue
+			}
 
-						if newY < 0 || newY >= len(input) || newX < 0 || newX >= len(row) {
-							break
-						}
+			for _, direction := range directions {
+				for i := 1; i < len(word); i++ {
+					newY := y + (direction[0] * i)
+					newX := x + (direction[1] * i)
 
-						if input[newY][newX] != word[i] {
-							break
-						}
+					if newY < 0 || newY >= len(input) || newX < 0 || newX >= len(row) {
+						break
+					}
 
-						if i == len(word) - 1 {
-							matches++
-						}
+					if input[newY][newX] != word[i] {
+						break
+					}
+
+					if i == len(word) - 1 {
+						matches++
 					}
 				}
 			}
@@ -60,25 +62,27 @@ func part2(input [][]string, word []string) {
 
 	for y, row := range input {
 		for x, char := range row {
-			if char == word[0] {
-				for _, direction := range directions {
-					for i := 0; i < len(word); i++ {
-						newY := y + (direction[0] * i) + (-direction[1] * i)
-						newX := x + (direction[1] * i) + (-direction[0] * i)
-						newY2 := y + (direction[0] * i) + (-direction[1] * (len(word) - 1 - i))
-						newX2 := x + (direction[1] * i) + (-direction[0] * (len(word) - 1 - i))
+			if char != word[0] {
+				continue
+			}
 
-						if newY < 0 || newY >= len(input) || newY2 < 0 || newY2 >= len(input) || newX < 0 || newX >= len(row) || newX2 < 0 || newX2 >= len(row) {
-							break
-						}
+			for _, direction := range directions {
+				for i := 0; i < len(word); i++ {
+					newY := y + (direction[0] * i) + (-direction[1] * i)
+					newX := x + (direction[1] * i) + (-direction[0] * i)
+					newY2 := y + (direction[0] * i) + (-direction[1] * (len(word) - 1 - i))
+					newX2 := x + (direction[1] * i) + (-direction[0] * (len(word) - 1 - i))
 
-						if input[newY][newX] != word[i] || input[newY2][newX2] != word[i] {
-							break
-						}
+					if newY < 0 || newY >= len(input) || newY2 < 0 || newY2 >= len(input) || newX < 0 || newX >= len(row) || newX2 < 0 || newX2 >= len(row) {
+						break
+					}
 
-						if i == len(word) - 1 {
-							matches++
-						}
+					if input[newY][newX] != word[i] || input[newY2][newX2] != word[i] {
+						break
+					}
+
+					if i == len(word) - 1 {
+						matches++
 					}
 				}
 			}
