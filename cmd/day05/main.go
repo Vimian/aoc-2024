@@ -78,8 +78,6 @@ func part1(orders map[int]map[int]bool, updates [][]int) [][]int {
 }
 
 func part2(orders map[int]map[int]bool, updates [][]int) {
-	fmt.Println(updates)
-
 	out:
 	for i := 0; i < len(updates); {
 		update := updates[i]
