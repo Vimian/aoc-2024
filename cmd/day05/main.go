@@ -96,7 +96,11 @@ func part2(orders map[int]map[int]bool, updates [][]int) {
 		i++
 	}
 
-	part1(orders, updates)
+	result := 0
+	for _, update := range updates {
+		result += update[len(update) / 2]
+	}
+	fmt.Println("the result is", result)
 }
 
 func main() {
