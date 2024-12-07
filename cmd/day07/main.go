@@ -13,10 +13,10 @@ type equation struct {
 	numbers []int
 }
 
-func parseInput(input string) ([]equation) {
+func parseInput(input string, lineEnding string) ([]equation) {
 	equations := []equation{}
 
-	for _, line := range strings.Split(input, "\r\n") {
+	for _, line := range strings.Split(input, lineEnding) {
 		equation := equation{}
 
 		parts := strings.Split(line, " ")
@@ -85,20 +85,22 @@ func sumOfValidEquations(equations []equation, operators []func(int, int) int) i
 	return result
 }
 
-func part1(equations []equation) {
+func part1(equations []equation) int {
 	operators := []func(int, int) int{addition, multiplication}
 	
 	result := sumOfValidEquations(equations, operators)
 
 	fmt.Printf("total calibration result is %d\n", result)
+	return result
 }
 
-func part2(equations []equation) {
+func part2(equations []equation) int {
 	operators := []func(int, int) int{addition, multiplication, concatenate}
 
 	result := sumOfValidEquations(equations, operators)
 
 	fmt.Printf("total calibration result is %d\n", result)
+	return result
 }
 
 func main() {
@@ -108,7 +110,7 @@ func main() {
 	}
 
 	input := string(data)
-	equations := parseInput(input)
+	equations := parseInput(input, "\r\n")
 
 	part1(equations)
 
