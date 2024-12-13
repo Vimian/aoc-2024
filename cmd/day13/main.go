@@ -51,14 +51,12 @@ func part1(machines []machine) int {
 	sum := 0
 
 	for _, machine := range machines {
-		for i := machine.prize[0] / machine.b[0]; i > 0; i-- {
-			if (
-				(machine.prize[0] - (machine.b[0] * i)) % machine.a[0] == 0 &&
-				(machine.prize[1] - (machine.b[1] * i)) % machine.a[1] == 0 &&
-				(machine.prize[0] - (machine.b[0] * i)) / machine.a[0] == (machine.prize[1] - (machine.b[1] * i)) / machine.a[1]) {
-				sum += i + (((machine.prize[0] - (machine.b[0] * i)) / machine.a[0]) * 3)
-				break
-			}
+		bMultiplier := ((machine.prize[1] * machine.a[0]) - (machine.prize[0] * machine.a[1])) / ((machine.b[1] * machine.a[0]) - (machine.b[0] * machine.a[1]))
+		
+		aMultiplier := (machine.prize[0] - (machine.b[0] * bMultiplier)) / machine.a[0]
+
+		if bMultiplier * machine.b[0] + aMultiplier * machine.a[0] == machine.prize[0] && bMultiplier * machine.b[1] + aMultiplier * machine.a[1] == machine.prize[1] {
+			sum += bMultiplier + (aMultiplier * 3)
 		}
 	}
 
@@ -84,8 +82,8 @@ func main() {
 	parsedInput := parseInput(input, "\r\n")
 
 	result := part1(parsedInput)
-	fmt.Println("checksum is:", result)
+	fmt.Println("fewest tokens:", result)
 
 	result = part2(parsedInput)
-	fmt.Println("checksum is:", result)
+	fmt.Println("fewest tokens:", result)
 }
