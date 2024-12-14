@@ -140,8 +140,8 @@ func main() {
 	parsedInput := parseInput(input, "\r\n")
 
 	result := part1(parsedInput, [2]int{101, 103}, 100)
-	fmt.Println("checksum is:", result)
+	fmt.Println("safety factor is:", result)
 
 	result = part2(parsedInput, [2]int{101, 103})
-	fmt.Println("checksum is:", result)
+	fmt.Println("seconds to first easter egg:", result)
 }
