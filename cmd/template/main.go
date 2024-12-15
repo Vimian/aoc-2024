@@ -10,10 +10,10 @@ import (
 func parseInput(input string, lineEnding string) ([][]int) {
 	parsedInput := [][]int{}
 
-	for _, lines := range strings.Split(input, lineEnding) {
+	for _, line := range strings.Split(input, lineEnding) {
 		parsedLine := []int{}
 
-		for _, char := range strings.Split(lines, "") {
+		for _, char := range strings.Split(line, "") {
 			value, err := strconv.Atoi(string(char))
 			if err != nil {
 				panic(err)
