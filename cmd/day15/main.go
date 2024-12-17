@@ -6,45 +6,58 @@ import (
 	"strings"
 )
 
-type Tiles int
+type tile int
 const (
-	WALL Tiles = iota
+	WALL tile = iota
 	BOX
 	EMPTY
+	LEFTBOX
+	RIGHTBOX
 )
 
-type Direction int
+type direction int
 const (
-	UP Direction = iota
+	UP direction = iota
 	RIGHT
 	DOWN
 	LEFT
 )
 
-func parseInput(input string, lineEnding string) ([][]Tiles, []Direction, [2]int) {
+func parseInput(input string, lineEnding string, thickness int) ([][]tile, []direction, [2]int) {
 	parts := strings.Split(input, lineEnding + lineEnding)
-	layout := [][]Tiles{}
+	layout := [][]tile{}
 	robotPosition := [2]int{0, 0}
 
 	for y, line := range strings.Split(parts[0], lineEnding) {
-		row := []Tiles{}
+		row := []tile{}
 		for x, symbol := range strings.Split(line, "") {
 			switch symbol {
 			case "#":
-				row = append(row, WALL)
+				for i := 0; i < thickness; i++ {
+					row = append(row, WALL)
+				}
 			case "O":
-				row = append(row, BOX)
+				if thickness == 1 {
+					row = append(row, BOX)
+				} else {
+					row = append(row, LEFTBOX)
+					row = append(row, RIGHTBOX)
+				}
 			case ".":
-				row = append(row, EMPTY)
+				for i := 0; i < thickness; i++ {
+					row = append(row, EMPTY)
+				}
 			case "@":
-				row = append(row, EMPTY)
-				robotPosition = [2]int{y, x}
+				for i := 0; i < thickness; i++ {
+					row = append(row, EMPTY)
+				}
+				robotPosition = [2]int{y, x * thickness}
 			}
 		}
 		layout = append(layout, row)
 	}
 
-	directions := []Direction{}
+	directions := []direction{}
 	for _, symbol := range strings.Split(
 		strings.ReplaceAll(parts[1], lineEnding, ""),
 		"") {
@@ -63,11 +76,10 @@ func parseInput(input string, lineEnding string) ([][]Tiles, []Direction, [2]int
 	return layout, directions, robotPosition
 }
 
-func part1(inputLayout [][]Tiles, directions []Direction, robotPosition [2]int) int {
-	layout := make([][]Tiles, len(inputLayout))
-	copy(layout, inputLayout)
-
-	directionOffsets := map[Direction][2]int{
+func simulateRobot(input string, lineEnding string, thickness int) [][]tile {
+	layout, directions, robotPosition := parseInput(input, lineEnding, thickness)
+	
+	directionOffsets := map[direction][2]int{
 		UP: {-1, 0},
 		RIGHT: {0, 1},
 		DOWN: {1, 0},
@@ -76,32 +88,59 @@ func part1(inputLayout [][]Tiles, directions []Direction, robotPosition [2]int) 
 
 	out:
 	for _, direction := range directions {
-		positionToCheck := [2]int{
-			robotPosition[0] + directionOffsets[direction][0],
-			robotPosition[1] + directionOffsets[direction][1],
-		}
-		for i := 0; positionToCheck[0] > 0 && positionToCheck[0] < len(layout) && positionToCheck[1] > 0 && positionToCheck[1] < len(layout[0]); i++ {
-			switch layout[positionToCheck[0]][positionToCheck[1]] {
-			case EMPTY:
-				robotPosition = [2]int{robotPosition[0] + directionOffsets[direction][0], robotPosition[1] + directionOffsets[direction][1]}
-				layout[positionToCheck[0]][positionToCheck[1]] = layout[robotPosition[0]][robotPosition[1]]
-				layout[robotPosition[0]][robotPosition[1]] = EMPTY
-				continue out
-			case WALL:
-				continue out
+		objectsToMove := []map[[2]int]bool{}
+		objectsToMove = append(objectsToMove, map[[2]int]bool{})
+		objectsToMove[len(objectsToMove) - 1][robotPosition] = true
+
+		for ; len(objectsToMove[len(objectsToMove) - 1]) > 0; {
+			objectsToMoveRow := map[[2]int]bool{}
+			
+			for object := range objectsToMove[len(objectsToMove) - 1] {
+				positionToCheck := [2]int{
+					object[0] + directionOffsets[direction][0],
+					object[1] + directionOffsets[direction][1],
+				}
+
+				switch layout[positionToCheck[0]][positionToCheck[1]] {
+				case WALL:
+					continue out
+				case LEFTBOX:
+					objectsToMoveRow[positionToCheck] = true
+					if direction == UP || direction == DOWN {
+						objectsToMoveRow[[2]int{positionToCheck[0], positionToCheck[1] + 1}] = true
+					}
+				case RIGHTBOX:
+					objectsToMoveRow[positionToCheck] = true
+					if direction == UP || direction == DOWN {
+						objectsToMoveRow[[2]int{positionToCheck[0], positionToCheck[1] - 1}] = true
+					}
+				case BOX:
+					objectsToMoveRow[positionToCheck] = true
+				}
 			}
-			positionToCheck = [2]int{
-				positionToCheck[0] + directionOffsets[direction][0],
-				positionToCheck[1] + directionOffsets[direction][1],
+
+			objectsToMove = append(objectsToMove, objectsToMoveRow)
+		}
+
+		robotPosition = [2]int{robotPosition[0] + directionOffsets[direction][0], robotPosition[1] + directionOffsets[direction][1]}
+
+		for i := len(objectsToMove) - 1; i > 0; i-- {
+			for object := range objectsToMove[i] {
+				layout[object[0] + directionOffsets[direction][0]][object[1] + directionOffsets[direction][1]] = layout[object[0]][object[1]]
+				layout[object[0]][object[1]] = EMPTY
 			}
 		}
 	}
 
+	return layout
+}
+
+func sumOfBoxes(layout [][]tile, markerTile tile) int {
 	sum := 0
 
 	for y, row := range layout {
 		for x, tile := range row {
-			if tile == BOX {
+			if tile == markerTile {
 				sum += (100 * y) + x
 			}
 		}
@@ -110,8 +149,16 @@ func part1(inputLayout [][]Tiles, directions []Direction, robotPosition [2]int) 
 	return sum
 }
 
-func part2(layout [][]Tiles, directions []Direction, robotPosition [2]int) int {
-	return 0
+func part1(input string, lineEnding string) int {
+	layout := simulateRobot(input, lineEnding, 1)
+
+	return sumOfBoxes(layout, BOX)
+}
+
+func part2(input string, lineEnding string) int {
+	layout := simulateRobot(input, lineEnding, 2)
+
+	return sumOfBoxes(layout, LEFTBOX)
 }
 
 func main() {
@@ -121,11 +168,10 @@ func main() {
 	}
 
 	input := string(data)
-	layout, directions, robotPosition := parseInput(input, "\r\n")
 
-	result := part1(layout, directions, robotPosition)
-	fmt.Println("sum of all boxes' GPS coordinates:", result)
+	result := part1(input, "\r\n")
+	fmt.Println("sum of all boxes' GPS coordinates is:", result)
 
-	result = part2(layout, directions, robotPosition)
-	fmt.Println("checksum is:", result)
+	result = part2(input, "\r\n")
+	fmt.Println("sum of all boxes' GPS coordinates is:", result)
 }
