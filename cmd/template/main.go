@@ -46,8 +46,8 @@ func main() {
 	parsedInput := parseInput(input, "\r\n")
 
 	result := part1(parsedInput)
-	fmt.Println("checksum is:", result)
+	fmt.Println("checksum:", result)
 
-	result = part2(parsedInput)
-	fmt.Println("checksum is:", result)
+	/*result = part2(parsedInput)
+	fmt.Println("checksum:", result)*/
 }
