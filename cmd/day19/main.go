@@ -34,20 +34,20 @@ func part1(towels []string, designs []string) (int, []string) {
 }
 
 func part2(towels []string, designs []string) int {
-	fmt.Println("towels:", towels)
-
 	sum := 0
 
 	for _, design := range designs {
-		fmt.Println("design:", design)
 		matches := map[int]map[int]bool{}
 		for _, towel := range towels {
-			indexs := regexp.MustCompile(towel).FindAllStringIndex(design, -1)
-			for _, index := range indexs {
-				if _, found := matches[index[0]]; !found {
-					matches[index[0]] = map[int]bool{}
+			for i := 0; i < len(design) - len(towel) + 1; i++ {
+				if design[i:i+len(towel)] != towel {
+					continue
 				}
-				matches[index[0]][index[1]] = true
+
+				if _, found := matches[i]; !found {
+					matches[i] = map[int]bool{}
+				}
+				matches[i][i+len(towel)] = true
 			}
 		}
 
@@ -62,18 +62,15 @@ func part2(towels []string, designs []string) int {
 			}
 
 			for end := range matches[i] {
-				/*if _, found := validEnds[end]; !found {
+				if _, found := validEnds[end]; !found {
 					continue
-				}*/
+				}
 
 				validEnds[i] += validEnds[end]
 			}
 		}
 
-		fmt.Println("matches:", matches)
-		fmt.Println("validEnds:", validEnds)
 		sum += validEnds[0]
-		fmt.Println("sum:", sum)
 	}
 
 	return sum
@@ -91,6 +88,6 @@ func main() {
 	result, _ := part1(towels, designs)
 	fmt.Println("designs possible:", result)
 
-	result = part2(towels, designs) // given answer 611033244835885
-	fmt.Println("total number of different ways you could make each design:", result) // right answer 950763269786650
+	result = part2(towels, designs)
+	fmt.Println("total number of different ways you could make each design:", result)
 }
